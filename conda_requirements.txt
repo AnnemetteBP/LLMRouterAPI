@@ -1,0 +1,13 @@
+numpy
+
+pandas
+
+scipy
+scikit-learn # sklearn
+
+matplotlib
+seaborn
+
+tqdm
+
+transformers[torch]

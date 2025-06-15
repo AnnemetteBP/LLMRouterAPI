@@ -1,6 +1,16 @@
+--extra-index-url https://download.pytorch.org/whl/cu118
+torch
+torchvision
+torchaudio
+
+accelerate
+ai2-olmo
+trl
+
 fastapi
 uvicorn
 transformers
 sentence-transformers
-torch
 pika
+accelerate
+bitsandbytes
