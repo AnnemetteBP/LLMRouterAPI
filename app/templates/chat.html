@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LLM Chat</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+        textarea { width: 100%; height: 100px; }
+        .chat { background: #fff; padding: 10px; border-radius: 5px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h2>Chat with Your LLM Expert</h2>
+    <form method="post">
+        <textarea name="prompt" placeholder="Enter your prompt here...">{{ prompt or "" }}</textarea><br><br>
+        <button type="submit">Send</button>
+    </form>
+
+    {% if response %}
+    <div class="chat">
+        <strong>You:</strong> {{ prompt }}<br><br>
+        <strong>LLM:</strong> {{ response }}
+    </div>
+    {% endif %}
+</body>
+</html>
