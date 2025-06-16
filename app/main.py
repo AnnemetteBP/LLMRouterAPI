@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from .controller import LLMRouter
-from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI(
@@ -42,11 +42,6 @@ def post_chat(request:Request, prompt:str=Form(...)):
     result, metadata = router.route(prompt, return_meta=True)
     chat_history.append({"user": prompt, "bot": result, "meta": metadata})
     return templates.TemplateResponse("chat.html", {"request": request, "history": chat_history})
-
-"""@app.post("/generate")
-def generate_text(data:PromptRequest):
-    result = router.route(data.prompt)
-    return {"response": result}"""
 
 @app.post("/generate-json")
 async def generate_json(prompt:str=Form(...)):
