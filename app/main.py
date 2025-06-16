@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from .controller import LLMRouter
@@ -12,20 +12,22 @@ app = FastAPI(
     version="0.1.0"
 )
 
-templates = Jinja2Templates(directory="app/templates")
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # or restrict to specific domain!
+    allow_origins=["*"],  # or restrict to specific domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+templates = Jinja2Templates(directory="app/templates")
+
 router = LLMRouter()
 
 class PromptRequest(BaseModel):
     prompt: str
+
+chat_history = []  # simple in-memory chat log
 
 @app.get("/health")
 def health_check():
@@ -33,14 +35,21 @@ def health_check():
 
 @app.get("/", response_class=HTMLResponse)
 def get_chat(request:Request):
-    return templates.TemplateResponse("chat.html", {"request": request, "response": None})
+    return templates.TemplateResponse("chat.html", {"request": request, "history": chat_history})
 
 @app.post("/", response_class=HTMLResponse)
 def post_chat(request:Request, prompt:str=Form(...)):
-    response = router.route(prompt)
-    return templates.TemplateResponse("chat.html", {"request": request, "prompt": prompt, "response": response})
+    result, metadata = router.route(prompt, return_meta=True)
+    chat_history.append({"user": prompt, "bot": result, "meta": metadata})
+    return templates.TemplateResponse("chat.html", {"request": request, "history": chat_history})
 
-@app.post("/generate")
+"""@app.post("/generate")
 def generate_text(data:PromptRequest):
     result = router.route(data.prompt)
-    return {"response": result}
+    return {"response": result}"""
+
+@app.post("/generate-json")
+async def generate_json(prompt:str=Form(...)):
+    result, meta = router.route(prompt, return_meta=True)
+    chat_history.append({"user": prompt, "bot": result, "meta": meta})
+    return JSONResponse(content={"response": result, "meta": meta})

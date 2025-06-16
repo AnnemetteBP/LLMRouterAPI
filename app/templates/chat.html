@@ -4,22 +4,52 @@
     <title>LLM Chat</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-        textarea { width: 100%; height: 100px; }
+        textarea { width: 100%; height: 80px; }
         .chat { background: #fff; padding: 10px; border-radius: 5px; margin-top: 20px; }
+        .meta { font-size: 0.8em; color: #555; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <h2>Chat with Your LLM Expert</h2>
-    <form method="post">
-        <textarea name="prompt" placeholder="Enter your prompt here...">{{ prompt or "" }}</textarea><br><br>
+    <h2>Chat with Your LLM 🤖</h2>
+    <form id="chat-form">
+        <textarea id="prompt" placeholder="Type your message..."></textarea><br>
         <button type="submit">Send</button>
     </form>
 
-    {% if response %}
-    <div class="chat">
-        <strong>You:</strong> {{ prompt }}<br><br>
-        <strong>LLM:</strong> {{ response }}
+    <div id="chat-log">
+        {% for chat in history %}
+        <div class="chat">
+            <strong>You:</strong> {{ chat.user }}<br><br>
+            <strong>LLM:</strong> {{ chat.bot }}<br>
+            <div class="meta">Expert: {{ chat.meta.expert_used }}, Task: {{ chat.meta.task }}, Confidence: {{ chat.meta.confidence }}</div>
+        </div>
+        {% endfor %}
     </div>
-    {% endif %}
+
+    <script>
+        document.getElementById("chat-form").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const prompt = document.getElementById("prompt").value;
+            const formData = new FormData();
+            formData.append("prompt", prompt);
+
+            const response = await fetch("/generate-json", {
+                method: "POST",
+                body: formData
+            });
+            const data = await response.json();
+
+            const chatLog = document.getElementById("chat-log");
+            const newChat = document.createElement("div");
+            newChat.className = "chat";
+            newChat.innerHTML = `
+                <strong>You:</strong> ${prompt}<br><br>
+                <strong>LLM:</strong> ${data.response}<br>
+                <div class="meta">Expert: ${data.meta.expert_used}, Task: ${data.meta.task}, Confidence: ${data.meta.confidence}</div>
+            `;
+            chatLog.appendChild(newChat);
+            document.getElementById("prompt").value = "";
+        });
+    </script>
 </body>
 </html>

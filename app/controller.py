@@ -22,7 +22,7 @@ class LLMRouter:
         self.fp_fallback = FPModel(DHL.FP3B.value, DHL.TOK3B.value)
 
 
-    def route(self, prompt:str) -> str:
+    """def route(self, prompt:str) -> str:
         task, confidence = self.classifier.classify(prompt)
 
         if confidence > 0.85 and task in self.experts:
@@ -30,4 +30,19 @@ class LLMRouter:
             return self.experts[task].predict(prompt)
         else:
             print("[Router] Falling back to FP model")
-            return self.fp_fallback.predict(prompt)
+            return self.fp_fallback.predict(prompt)"""
+    
+    def route(self, prompt: str, return_meta=False):
+        task, confidence = self.classifier.classify(prompt)
+        meta = {"task": task, "confidence": round(confidence, 3)}
+
+        if confidence > 0.85 and task in self.experts:
+            print(f"[Router] Routing to expert: {task}")
+            result = self.experts[task].predict(prompt)
+            meta["expert_used"] = task
+        else:
+            print("[Router] Falling back to FP model")
+            result = self.fp_fallback.predict(prompt)
+            meta["expert_used"] = "fallback"
+
+        return (result, meta) if return_meta else result
