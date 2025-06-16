@@ -6,6 +6,8 @@ from pydantic import BaseModel
 from .controller import LLMRouter
 
 
+# to run the app in browser: uvicorn app.main:app --reload
+
 app = FastAPI(
     title="LLM Router API",
     description="A modular, domain-aware language model router",
